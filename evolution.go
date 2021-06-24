@@ -1,23 +1,26 @@
 package main
-import (
-	"context"
-	"net/http"
-	"log"
-	"time"
-	"fmt"
-	"strconv"
 
-	"github.com/labstack/echo/v4"
+import (
+	"bytes"
+	"context"
+	"encoding/csv"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/labstack/echo/v4"
 )
 
 type DolarEvolutionDay struct {
-	Date string `json:"date"`
+	Date   string `json:"date"`
 	Source string `json:"source"`
-	Value Number `json:"value"`
+	Value  Number `json:"value"`
 }
 
-func getDolarEvolutionData(days string, db *pgxpool.Pool) ([]DolarEvolutionDay) {
+func getDolarEvolutionData(days string, db *pgxpool.Pool) []DolarEvolutionDay {
 	limitStr := ""
 	var res []DolarEvolutionDay
 	if days != "" {
@@ -26,22 +29,20 @@ func getDolarEvolutionData(days string, db *pgxpool.Pool) ([]DolarEvolutionDay) 
 			limitStr = "limit " + days
 		}
 	}
-	
 
-	rows,err := db.Query(context.Background(), `
+	rows, err := db.Query(context.Background(), `
 		select dttm, tipo, value_sell
 	from dolar_evolution
 	order by dttm desc
-	` + limitStr)
+	`+limitStr)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for rows.Next(){
+	for rows.Next() {
 		var objAppend DolarEvolutionDay
 		var dateObj time.Time
-
 
 		if err := rows.Scan(&dateObj, &objAppend.Source, &objAppend.Value); err != nil {
 			log.Fatal(err)
@@ -59,4 +60,27 @@ func dolar_evolution(c echo.Context, db *pgxpool.Pool) error {
 	res_data := getDolarEvolutionData(days, db)
 
 	return c.JSON(http.StatusOK, res_data)
+}
+
+func dolar_evolution_csv(c echo.Context, db *pgxpool.Pool) error {
+	days := c.QueryParam("days")
+	res_data := getDolarEvolutionData(days, db)
+
+	var csv_data [][]string
+
+	for _, d := range res_data {
+		tmp := []string{d.Date, d.Source, fmt.Sprintf("%.2f", d.Value)}
+		csv_data = append(csv_data, tmp)
+	}
+
+	b := new(bytes.Buffer)
+	w := csv.NewWriter(b)
+
+	w.WriteAll(csv_data)
+
+	if err := w.Error(); err != nil {
+		log.Fatal(err)
+	}
+
+	return c.Blob(http.StatusOK, "text/csv", b.Bytes())
 }
