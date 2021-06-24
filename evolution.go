@@ -66,7 +66,9 @@ func dolar_evolution_csv(c echo.Context, db *pgxpool.Pool) error {
 	days := c.QueryParam("days")
 	res_data := getDolarEvolutionData(days, db)
 
-	var csv_data [][]string
+	csv_data := [][]string{
+		{"day", "type", "value_sell"},
+	}
 
 	for _, d := range res_data {
 		tmp := []string{d.Date, d.Source, fmt.Sprintf("%.2f", d.Value)}
