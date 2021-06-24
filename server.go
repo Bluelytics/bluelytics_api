@@ -28,10 +28,10 @@ func main() {
 	e.GET("json/last_price", func(c echo.Context) error {
 		return v1_json_last_price(c, db)
 	})
-	e.GET("data/graphs/evolution.json", func(c echo.Context) error {
-		return dolar_evolution(c, db)
+	e.GET("v2/evolution.json", func(c echo.Context) error {
+		return dolar_evolution_json(c, db)
 	})
-	e.GET("data/evolution.csv", func(c echo.Context) error {
+	e.GET("v2/evolution.csv", func(c echo.Context) error {
 		return dolar_evolution_csv(c, db)
 	})
 	e.GET("data/json/currency.json", func(c echo.Context) error {
