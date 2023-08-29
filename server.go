@@ -31,6 +31,9 @@ func main() {
 	e.GET("v2/evolution.json", func(c echo.Context) error {
 		return dolar_evolution_json(c, db)
 	})
+	e.GET("v2/historical", func(c echo.Context) error {
+		return v2_historical(c, db)
+	})
 	e.GET("v2/evolution.csv", func(c echo.Context) error {
 		return dolar_evolution_csv(c, db)
 	})

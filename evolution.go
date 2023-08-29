@@ -39,10 +39,10 @@ func getDolarEvolutionData(days string, db *pgxpool.Pool) []DolarEvolutionDay {
 	order by
 		dttm desc
 	`+limitStr)
-	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var objAppend DolarEvolutionDay

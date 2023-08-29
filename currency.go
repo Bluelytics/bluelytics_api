@@ -1,31 +1,32 @@
 package main
+
 import (
 	"context"
-	"net/http"
 	"log"
+	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/labstack/echo/v4"
 )
 
 type CurrencyValue struct {
-	Code string `json:"code"`
-	Name string `json:"name"`
+	Code  string `json:"code"`
+	Name  string `json:"name"`
 	Value Number `json:"value"`
 }
 
-func getCurrencydata(db *pgxpool.Pool) ([]CurrencyValue) {
+func getCurrencydata(db *pgxpool.Pool) []CurrencyValue {
 	var res []CurrencyValue
-	rows,err := db.Query(context.Background(), `
+	rows, err := db.Query(context.Background(), `
 		select code, name, value
 	from currency_value_latest
 	`)
-	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
-	for rows.Next(){
+	for rows.Next() {
 		var objAppend CurrencyValue
 
 		if err := rows.Scan(&objAppend.Code, &objAppend.Name, &objAppend.Value); err != nil {
