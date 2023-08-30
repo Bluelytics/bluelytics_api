@@ -199,6 +199,16 @@ func getHistoricalData(day string, db *pgxpool.Pool) (DolaresHistorical, error) 
 		return res, fmt.Errorf("parsing day parameter: use YYYY-MM-DD")
 	}
 
+	if date.Weekday() == time.Saturday {
+		// Use friday's data
+		date = date.AddDate(0, 0, -1)
+	}
+
+	if date.Weekday() == time.Sunday {
+		// Use friday's data
+		date = date.AddDate(0, 0, -2)
+	}
+
 	rows, err := db.Query(context.Background(), `
 	select
 		lower(tipo) as tipo, value_sell, value_buy
