@@ -211,7 +211,7 @@ func getHistoricalData(day string, db *pgxpool.Pool) (DolaresHistorical, error) 
 
 	rows, err := db.Query(context.Background(), `
 	select
-		lower(tipo) as tipo, value_sell, value_buy
+		lower(tipo) as tipo, value_buy, value_sell
 	from
 		dolar_evolution
 	where dttm = $1
